@@ -1,2 +1,4 @@
 __pycache__/
 geckodriver.log
+client_secret.json
+credentials.json

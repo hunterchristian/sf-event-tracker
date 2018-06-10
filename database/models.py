@@ -15,9 +15,11 @@ class Event(db.Model):
   """
 
   __tablename__ = 'events'
-  id          = db.Column(db.Integer, primary_key=True)
-  #link        = Column(String, unique=True)
-  date        = db.Column(db.String)
-  time        = db.Column(db.String)
-  description = db.Column(db.String)
-  price       = db.Column(db.String)
+  id             = db.Column(db.Integer, primary_key=True)
+  #link          = Column(String, unique=True)
+  date           = db.Column(db.String)
+  time           = db.Column(db.String)
+  datetime_start = db.Column(db.String)
+  datetime_end   = db.Column(db.String)
+  description    = db.Column(db.String)
+  price          = db.Column(db.String)

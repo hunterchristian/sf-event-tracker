@@ -5,6 +5,7 @@ sys.path.append('/Users/hunterhodnett/PersonalProjects/sf-events-tracker')
 from bs4 import BeautifulSoup
 
 from browser import getPageSource
+from formatter import formatDatetime, createDefaultEndTime
 
 from database.createDatabase import db
 from database.models import Event
@@ -44,13 +45,23 @@ def scrape_events():
 
       event = db.session.query(Event).filter_by(id=id).first()
 
+      # TODO handle creation of 'all day' events
+      if time == 'All Day':
+        continue
+
+      datetime_start = formatDatetime(event_date, time)
+      datetime_end = createDefaultEndTime(event_date, time)
+
       # Only add event to the DB if it doesn't already exist
       if event is None:
         event = Event(
           id=id,
           date=event_date,
-          time=time,
-          price=price
+          datetime_end=datetime_end,
+          datetime_start=datetime_start,
+          description=desc,
+          price=price,
+          time=time
         )
 
         db.session.add(event)
