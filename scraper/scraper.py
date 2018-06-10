@@ -1,34 +1,20 @@
+import sys
+# Include modules in parent directory (mainly for /database folder)
+sys.path.append('/Users/hunterhodnett/PersonalProjects/sf-events-tracker')
+
 from bs4 import BeautifulSoup
 
 from browser import getPageSource
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from database.createDatabase import db
+from database.models import Event
+
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 from hashlib import sha256
 
-engine = create_engine('sqlite:///events.db', echo=False)
-Base = declarative_base()
-
-class Event(Base):
-  """
-  A table to store data on events that are happening in San Francisco
-  """
-
-  __tablename__ = 'events'
-  id          = Column(String, primary_key=True)
-  #link        = Column(String, unique=True)
-  date        = Column(String)
-  time        = Column(String)
-  description = Column(String)
-  price       = Column(String)
-
-Base.metadata.create_all(engine)
-
-Session = sessionmaker(bind=engine)
-session = Session()
+db.create_all()
 
 SF_EVENTS_URL = 'http://sf.funcheap.com/events/san-francisco/'
 EMPTY_DATE = '<not found>'
@@ -54,9 +40,9 @@ def scrape_events():
 
       # Create hash of all info about this event
       # to detect duplicates in DB
-      id = sha256((event_date + time + desc + price).encode('utf-8')).hexdigest()
+      id = int(sha256((event_date + time + desc + price).encode('utf-8')).hexdigest(), 16) % sys.maxsize
 
-      event = session.query(Event).filter_by(id=id).first()
+      event = db.session.query(Event).filter_by(id=id).first()
 
       # Only add event to the DB if it doesn't already exist
       if event is None:
@@ -67,7 +53,7 @@ def scrape_events():
           price=price
         )
 
-        session.add(event)
-        session.commit()
+        db.session.add(event)
+        db.session.commit()
 
 scrape_events()
